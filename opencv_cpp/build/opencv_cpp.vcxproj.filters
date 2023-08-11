@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\SMARTECH\Desktop\ME\freelance\off_market_places\skin_cancer_detection\opencv_cpp\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\SMARTECH\Desktop\ME\freelance\off_market_places\skin_cancer_detection\opencv_cpp\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{886B886B-2C5C-384C-AB43-6D65BE0F667D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

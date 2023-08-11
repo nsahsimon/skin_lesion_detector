@@ -1,0 +1,10 @@
+^C:\USERS\SMARTECH\DESKTOP\ME\FREELANCE\OFF_MARKET_PLACES\SKIN_CANCER_DETECTION\OPENCV_CPP\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp -BC:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build --check-stamp-file C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

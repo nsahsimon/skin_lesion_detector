@@ -1,0 +1,9 @@
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/Experimental.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/Nightly.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/Continuous.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/NightlyMemoryCheck.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/opencv_cpp.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/PACKAGE.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/RUN_TESTS.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/SMARTECH/Desktop/ME/freelance/off_market_places/skin_cancer_detection/opencv_cpp/build/CMakeFiles/ZERO_CHECK.dir
