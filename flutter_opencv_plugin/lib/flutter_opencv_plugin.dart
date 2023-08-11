@@ -120,6 +120,82 @@ Future<List<List<double>>> _detectCorners(Map data, DynamicLibrary omrLib) async
   return results;
 }
 
+///bridge function for skin lesion detection
+Future<int> _detectSkinLesion(Map data, DynamicLibrary omrLib) async{
+  ///unpacking data
+  var frame = data['frame'];
+  double roiWidthFactor = data['roi_width_factor'];
+  double roiHeightFactor = data['roi_height_factor'];
+
+  debugPrint("Retrieved frame in isolate. Dimensions: (${frame.width}, ${frame.height}) ");
+
+  /// Allocate memory for the 3 planes of the image
+  Pointer<Uint8> plane0Bytes = malloc.allocate(frame.planes[0].bytes.length);
+  Pointer<Uint8> plane1Bytes = malloc.allocate(frame.planes[1].bytes.length);
+  Pointer<Uint8> plane2Bytes = malloc.allocate(frame.planes[2].bytes.length);
+
+  /// Assign the planes data to the pointers of the image
+  Uint8List pointerList = plane0Bytes.asTypedList(
+      frame.planes[0].bytes.length
+  );
+  Uint8List pointerList1 = plane1Bytes.asTypedList(
+      frame.planes[1].bytes.length
+  );
+  Uint8List pointerList2 = plane2Bytes.asTypedList(
+      frame.planes[2].bytes.length
+  );
+  pointerList.setRange(0, frame.planes[0].bytes.length,
+      frame.planes[0].bytes);
+  pointerList1.setRange(0, frame.planes[1].bytes.length,
+      frame.planes[1].bytes);
+  pointerList2.setRange(0, frame.planes[2].bytes.length,
+      frame.planes[2].bytes);
+
+  ///Extract relevant parameters from the image frame
+  int width = frame.width;
+  int height = frame.height;
+  int bytesPerRow0 = frame.planes[0].bytesPerRow;
+  int bytesPerPixel0 = frame.planes[0].bytesPerPixel;
+  int bytesPerRow1 = frame.planes[1].bytesPerRow;
+  int bytesPerPixel1 = frame.planes[1].bytesPerPixel;
+  int bytesPerRow2 = frame.planes[2].bytesPerRow;
+  int bytesPerPixel2 = frame.planes[2].bytesPerPixel;
+
+
+  int Function(
+      Pointer<Uint8> plane0Bytes,Pointer<Uint8> plane1Bytes,Pointer<Uint8> plane2Bytes,
+      int width, int height, double roiWidthFactor, double roiHeightFactor,
+      int bytesPerRowPlane0, int bytesPerRowPlane1,int bytesPerRowPlane2,
+      int bytesPerPixelPlane0, int bytesPerPixelPlane1, int bytesPerPixelPlane2) skinLesionDetectorDart
+  = omrLib.lookup<NativeFunction<Int32 Function(
+      Pointer<Uint8>, Pointer<Uint8>, Pointer<Uint8>,
+      Int32, Int32, Float, Float,
+      Int32, Int32, Int32,
+      Int32, Int32, Int32)>>("skinLesionDetector").asFunction();
+
+  int results = 0;
+
+  int start = DateTime.now().microsecondsSinceEpoch;
+  results = skinLesionDetectorDart(
+      plane0Bytes, plane1Bytes, plane2Bytes,
+      width, height, roiWidthFactor, roiHeightFactor,
+      bytesPerRow0, bytesPerRow1, bytesPerRow2,
+      bytesPerPixel0, bytesPerPixel1, bytesPerPixel2
+  );
+
+  int stop = DateTime.now().microsecondsSinceEpoch;
+  int time = stop - start;
+  debugPrint("***DETECTED SKIN LESIONS IN : ${time / 1000} SECONDS****");
+
+  ///free memory
+  malloc.free(plane0Bytes);
+  malloc.free(plane1Bytes);
+  malloc.free(plane2Bytes);
+
+  return results;
+}
+
+
 /// Add logic for other functions
 /*
     <return type> _<process name>(<arguments>) async {
@@ -183,8 +259,12 @@ class OpencvIsolate {
               debugPrint("Isolate detected detectConer message");
               List<List<double>> result = await _detectCorners(message, omrLib);
               sendPort.send(result);
+            }else if (message['process'] == 'DETECT_SKIN_LESION') {
+              debugPrint("Isolate has received a \"detect skin lesion\" request");
+              int result = await _detectSkinLesion(message, omrLib);
+              sendPort.send(result);
             }
-            ///Add your own processes
+            ///Add and handle your own processes
             /*
             else if (message['process'] == '<PROCESS_NAME>') {
               <return type> result = await <process function>(message, omrLib);
@@ -283,12 +363,12 @@ class Opencv {
     return result;
   }
 
-  Future<List<List<double>>> detectDarkSpots({required var frame}) async{
-    debugPrint("Detecting Corners in isolate");
-    List<List<double>> result = [];
+  Future<int> detectDarkSpots({required var frame, required double roiWidthFactor, required double roiHeightFactor}) async{
+    debugPrint("Detecting dark spots in isolate");
+    int result = 0;
     try {
       resultStreamController = StreamController();
-      mainSendPort.send({"frame": frame , 'process':'DETECT_CORNERS'});
+      mainSendPort.send({"frame": frame , "roi_width_factor" : roiWidthFactor, "roi_height_factor" : roiHeightFactor, 'process':'DETECT_SKIN_LESION'});
       debugPrint("Running stream");
       result = await resultStreamController!.stream.first;// as Future<List<Map<String, dynamic>?>>;
       debugPrint("Trying to close stream");
