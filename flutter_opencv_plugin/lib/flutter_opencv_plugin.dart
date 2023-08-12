@@ -383,9 +383,9 @@ class Opencv {
     return result;
   }
 
-  Future<String?> liveDarkSpotDetection(BuildContext context) async{
+  Future<File?> liveDarkSpotDetection(BuildContext context) async{
     cameras = await availableCameras();
-    String? result = await Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScreen(detector: detectDarkSpots)));
+    File? result = await Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScreen(detector: detectDarkSpots)));
     // return CameraScreen(detector: detectDarkSpots);
     return result;
   }

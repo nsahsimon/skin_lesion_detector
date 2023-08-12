@@ -1,7 +1,8 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-
+import 'package:image/image.dart' as imglib;
 import '../constants.dart';
 
 
@@ -30,6 +31,9 @@ class _CameraScreenState extends State<CameraScreen> {
   double lowerBarLengthFraction = 0.4;
   int detectedSpotCount = 0;
   bool detectedValidSpot = false;
+  List<int> prevDetectedSpotCounts = List<int>.filled(10, 0,growable: true); //Keep track of the last 10 spot counts
+  int prevDetectedSpotCountIdx = 0; //has a max value of 9
+  int maxIdx = 9;
 
   Future<void> listenToFocusMode() async {
     while (true) {
@@ -40,6 +44,66 @@ class _CameraScreenState extends State<CameraScreen> {
 
       });
     }
+  }
+
+  Future<File> cropImage(File inputImage) async {
+    final image = imglib.decodeImage(await inputImage.readAsBytes());
+    if (image != null) {
+    // Define the cropping rectangle
+
+    final height = (image!.height * roiHeightFactor).toInt();  // Width of the cropping rectangle
+    final width = (image!.width * roiWidthFactor).toInt(); // Height of the cropping rectangle
+    final left = ((image!.width - width) ~/ 2);   // Left coordinate of the cropping rectangle
+    final top = ((image!.height - height) ~/ 2);    // Top coordinate of the cropping rectangle
+
+
+      final croppedImage = imglib.copyCrop(image, x:left, y:top, width: width, height: height);
+
+      // Save the cropped image to a new File
+      final croppedFile = File(inputImage.path.replaceAll(RegExp(r'\.\w+$'), '_cropped.png'));
+      await croppedFile.writeAsBytes(imglib.encodePng(croppedImage));
+
+      return croppedFile;
+    } else {
+      throw Exception('Error decoding image.');
+    }
+  }
+
+  void recordSpotCount(int currentSpotCount) {
+    if(prevDetectedSpotCountIdx <= maxIdx) {
+      prevDetectedSpotCounts[prevDetectedSpotCountIdx] = currentSpotCount;
+      prevDetectedSpotCountIdx++;
+    } else {
+      prevDetectedSpotCounts[0] = currentSpotCount;
+      prevDetectedSpotCountIdx = 1;
+    }
+  }
+
+  Future<void> validateSpot() async{
+    // /// Must have recorded at least maxIdx values
+    // if(prevDetectedSpotCounts.length < maxIdx) return;
+    for(int i = 0 ; i < maxIdx; i++) {
+      if(prevDetectedSpotCounts[i] <= 0) return;
+      if(prevDetectedSpotCounts[i] != prevDetectedSpotCounts[(i + 1)%(maxIdx + 1)]) return;
+    }
+    controller!.stopImageStream();
+    setState(() {
+      isDetecting = false;
+      detectedValidSpot  = true;
+    });
+    if(true ) {
+      // controller!.stopImageStream();
+      // setState(() {
+      //   isDetecting = false;
+      //   detectedValidSpot  = true;
+      // });
+      XFile image = await controller!.takePicture();
+      Future.delayed(Duration(seconds: 1), () async{
+        var croppedImage = await cropImage(File(image.path));
+        Navigator.pop(context,croppedImage);
+      });
+    }
+
   }
 
   @override
@@ -61,9 +125,10 @@ class _CameraScreenState extends State<CameraScreen> {
         controller!.startImageStream(
                 (imgFrame) async{
               frame = imgFrame;
-              /// Do not detect skin lesions if already detecting corner
+              /// Do not detect skin lesions if already detecting skin lession
               int sensorExpTime = frame.sensorExposureTime ?? -1;
               if(isDetecting == true && sensorExpTime < 50000000) return;
+
               if(mounted) {
                 setState(() {
                   isDetecting = true;
@@ -76,34 +141,11 @@ class _CameraScreenState extends State<CameraScreen> {
                 detectedSpotCount = tempSpotCount;
               });
 
+              recordSpotCount(detectedSpotCount);
+
               int stop = DateTime.now().microsecondsSinceEpoch;
 
-              // debugPrint("FOUND ${cornerPoints.length} corner points");
-              // double width = MediaQuery.of(context).size.width;
-              // double height = MediaQuery.of(context).size.height;
-              // cornerAvatars = [];
-              // for(List<double> cornerPoint in cornerPoints) {
-              //   cornerAvatars.add(
-              //       Positioned(
-              //           left: cornerPoint[0] * width - 75 / 2,
-              //           top: cornerPoint[1] * height - 75 / 2,
-              //           child: Container(
-              //               height: 75,
-              //               width: 75,
-              //               decoration: BoxDecoration(
-              //                   shape: BoxShape.circle,
-              //                   border: Border.all(
-              //                     color: cornerPoints.length == 4 ? Colors.blue : Colors.red,
-              //                   )
-              //               )
-              //           )
-              //         // child: Text("o", style: TextStyle(color: cornerPoints.length == 4 ? Colors.blue : Colors.red, fontSize: 30),)
-              //       )
-              //   );
-              // }
-              //
-              // /// Update the list of previous corners
-              // prevCorners = cornerPoints;
+              await validateSpot();
 
               if(mounted) {
                 setState(() {
@@ -195,9 +237,9 @@ class _CameraScreenState extends State<CameraScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text("$detectedSpotCount Spot detected ", style: TextStyle(color: Colors.white)),
+                          Text("Spot detected ", style: TextStyle(color: Colors.white)),
                           SizedBox(width: 20),
-                          detectedSpotCount == 0 ? Icon(Icons.close, color: Colors.red) : Icon(Icons.check, color: Colors.green)
+                          detectedValidSpot == false ? Icon(Icons.close, color: Colors.red) : Icon(Icons.check, color: Colors.green)
                         ],
                       ),
                     ),

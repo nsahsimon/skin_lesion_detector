@@ -61,6 +61,13 @@ target_link_libraries(<lib_name> lib_opencv ${log-lib})
         ndkVersion = "23.1.7779620" //Specify the ndk version installed on your computer
     }
 ```
+
+- Add the following code to <plugin root directory>/Android/src/main/AndroidManifest.xml . This will enable camera support for Android 13 devices.
+
+```
+	<uses-feature  android:name="android.hardware.camera"  android:required="true"/>
+```
+
 - Add the following dependencies to your pubspec.yaml file
 
 	ffi, image_picker, camera, path_provider or any other if necessary
