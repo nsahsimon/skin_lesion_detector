@@ -43,36 +43,36 @@ int detectBlobsFromPath(string filename )
     cv::resize(im, im, newSize);
 
 	im = hairRemove(im);
-    imshow("image no hair", im);
-    waitKey(0);
+    // imshow("image no hair", im);
+    // waitKey(0);
 
 
 	// Convert the color image to grayscale
     cv::cvtColor(im, im, cv::COLOR_BGR2GRAY);
-	imshow("Gray image", im);
-    waitKey(0);
+	// imshow("Gray image", im);
+    // waitKey(0);
 
 	// Apply Otsu's thresholding
     cv::Mat binaryImage;
     cv::threshold(im, im, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU);
-	imshow("binary image", im);
-    waitKey(0);
+	// imshow("binary image", im);
+    // waitKey(0);
     
 	// Define a kernel for morphological operations (structuring element)
     cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
     
     // Apply morphological opening
     cv::morphologyEx(im, im, cv::MORPH_OPEN, kernel);
-	imshow("Morphed image", im);
-    waitKey(0);
+	// imshow("Morphed image", im);
+    // waitKey(0);
 
 	// Define a kernel for erosion (structuring element)
     cv::Mat kernelErode = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
     
     // Apply erosion
     cv::erode(im, im, kernelErode, Point(-1, -1), 3);
-	imshow("Eroded image", im);
-    waitKey(0);
+	// imshow("Eroded image", im);
+    // waitKey(0);
 
 	int imageArea = im.cols * im.rows;
 
@@ -137,8 +137,8 @@ int detectBlobsFromPath(string filename )
 	drawKeypoints( im, keypoints, im_with_keypoints, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
 	// Show blobs
-	imshow("keypoints", im_with_keypoints );
-	waitKey(0);
+	// imshow("keypoints", im_with_keypoints );
+	// waitKey(0);
 
     return keypoints.size();
 }
@@ -251,8 +251,8 @@ int detectBlobs(Mat image, float roiWidthFactor, float roiHeightFactor)
 	drawKeypoints( im, keypoints, im_with_keypoints, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
 	// Show blobs
-	imshow("keypoints", im_with_keypoints );
-	waitKey(0);
+	// imshow("keypoints", im_with_keypoints );
+	// waitKey(0);
 
     return keypoints.size();
 }
