@@ -152,7 +152,7 @@ int detectBlobs(Mat image, float roiWidthFactor, float roiHeightFactor)
     }
 
     // Convert the color image to grayscale
-    cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
+    // cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
     //imshow("image", im);
     //waitKey();
 
@@ -168,6 +168,35 @@ int detectBlobs(Mat image, float roiWidthFactor, float roiHeightFactor)
     // Crop the image to the defined ROI
     cv::Mat im = image(cv::Rect(x, y, width, height));
 
+	// Define the new dimensions for resizing
+    cv::Size newSize(360, 360);  // New width and height
+    
+    // Resize the image
+    cv::resize(im, im, newSize);
+
+	im = hairRemove(im);
+
+	// Convert the color image to grayscale
+    cv::cvtColor(im, im, cv::COLOR_BGR2GRAY);
+
+	// Apply Otsu's thresholding
+    cv::Mat binaryImage;
+    cv::threshold(im, im, 0, 255, cv::THRESH_BINARY + cv::THRESH_OTSU);
+    
+	// Define a kernel for morphological operations (structuring element)
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+    
+    // Apply morphological opening
+    cv::morphologyEx(im, im, cv::MORPH_OPEN, kernel);
+
+	// Define a kernel for erosion (structuring element)
+    cv::Mat kernelErode = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+    
+    // Apply erosion
+    cv::erode(im, im, kernelErode, Point(-1, -1), 3);
+
+	int imageArea = im.cols * im.rows;
+
 	// Setup SimpleBlobDetector parameters.
 	SimpleBlobDetector::Params params;
 
@@ -177,11 +206,13 @@ int detectBlobs(Mat image, float roiWidthFactor, float roiHeightFactor)
 
 	// Filter by Area.
 	params.filterByArea = true;
-	params.minArea = 500;
+	params.minArea = int(imageArea * 0.1);//100;
+	params.maxArea = 10000000;
 
 	// Filter by Circularity
-	params.filterByCircularity = false;
-	params.minCircularity = 0.1;
+	params.filterByCircularity = true;
+	params.minCircularity = 0.3;
+	params.maxCircularity = 1000000;
 
 	// Filter by Convexity
 	params.filterByConvexity = false;
