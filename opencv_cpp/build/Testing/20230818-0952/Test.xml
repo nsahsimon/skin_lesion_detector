@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="Win32-MSBuild"
+	BuildStamp="20230818-0952-Experimental"
+	Name="DESKTOP-37UUN8A"
+	Generator="ctest-3.27.1"
+	CompilerName="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/Hostx64/x64/cl.exe"
+	CompilerVersion="19.29.30151.0"
+	OSName="Windows"
+	Hostname="DESKTOP-37UUN8A"
+	OSRelease=" Professional"
+	OSVersion=" (Build 21996)"
+	OSPlatform="AMD64"
+	Is64Bits="1"
+	VendorString="GenuineIntel"
+	VendorID="Intel Corporation"
+	FamilyID="6"
+	ModelID="14"
+	ProcessorCacheSize="-1"
+	NumberOfLogicalCPU="4"
+	NumberOfPhysicalCPU="2"
+	TotalVirtualMemory="31054"
+	TotalPhysicalMemory="20359"
+	LogicalProcessorsPerPhysical="2"
+	ProcessorClockFrequency="2496"
+	>
+	<Testing>
+		<StartDateTime>Aug 18 10:52 W. Central Africa Standard Time</StartDateTime>
+		<StartTestTime>1692352363</StartTestTime>
+		<TestList/>
+		<EndDateTime>Aug 18 10:52 W. Central Africa Standard Time</EndDateTime>
+		<EndTestTime>1692352363</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>

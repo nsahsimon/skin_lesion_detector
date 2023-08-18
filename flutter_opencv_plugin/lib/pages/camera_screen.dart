@@ -31,9 +31,11 @@ class _CameraScreenState extends State<CameraScreen> {
   double lowerBarLengthFraction = 0.4;
   int detectedSpotCount = 0;
   bool detectedValidSpot = false;
-  List<int> prevDetectedSpotCounts = List<int>.filled(10, 0,growable: true); //Keep track of the last 10 spot counts
+  List<int> prevDetectedSpotCounts = List<int>.filled(5, 0,growable: true); //Keep track of the last 10 spot counts
   int prevDetectedSpotCountIdx = 0; //has a max value of 9
-  int maxIdx = 9;
+  int maxIdx = 4;
+  bool imageClear = false;
+  bool imageInFocus = false;
 
   Future<void> listenToFocusMode() async {
     while (true) {
@@ -98,7 +100,7 @@ class _CameraScreenState extends State<CameraScreen> {
       //   detectedValidSpot  = true;
       // });
       XFile image = await controller!.takePicture();
-      Future.delayed(Duration(seconds: 1), () async{
+      Future.delayed(Duration(seconds: 0), () async{
         var croppedImage = await cropImage(File(image.path));
         Navigator.pop(context,croppedImage);
       });
@@ -117,17 +119,21 @@ class _CameraScreenState extends State<CameraScreen> {
       }
 
       // listenToFocusMode();
-      controller!.setExposureMode(ExposureMode.auto);
-      controller!.setFocusMode(FocusMode.auto);
+      // controller!.setExposureMode(ExposureMode.auto);
+      // controller!.setFocusMode(FocusMode.auto);
+      // controller!.setFlashMode(FlashMode.torch);
 
       controller?.initialize().then((_) {
+        controller!.setExposureMode(ExposureMode.auto);
+        controller!.setFocusMode(FocusMode.auto);
+        // controller!.setFlashMode(FlashMode.torch);
         debugPrint("Started image Stream");
         controller!.startImageStream(
                 (imgFrame) async{
               frame = imgFrame;
               /// Do not detect skin lesions if already detecting skin lession
               int sensorExpTime = frame.sensorExposureTime ?? -1;
-              if(isDetecting == true && sensorExpTime < 50000000) return;
+              if(isDetecting == true && sensorExpTime < 50000) return;
 
               if(mounted) {
                 setState(() {
@@ -232,14 +238,14 @@ class _CameraScreenState extends State<CameraScreen> {
                     right: 10,
                     child: Container(
                       color: Colors.black87.withOpacity(0.4),
-                      height: 50,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
+                      height: 100,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text("Spot detected ", style: TextStyle(color: Colors.white)),
-                          SizedBox(width: 20),
-                          detectedValidSpot == false ? Icon(Icons.close, color: Colors.red) : Icon(Icons.check, color: Colors.green)
+                          FeedbackTile(title: "Spot detected", state: detectedValidSpot),
+                          FeedbackTile(title: "Image clear", state: imageClear),
+                          FeedbackTile(title: "Image in focus", state: imageInFocus),
+
                         ],
                       ),
                     ),
@@ -250,19 +256,31 @@ class _CameraScreenState extends State<CameraScreen> {
             }
         ),
 
-        // floatingActionButton: FloatingActionButton(
-        //     child: Icon(Icons.camera),
-        //     onPressed: () async{
-        //       if(validateNewCorners(cornerPoints)) {
-        //         setState((){
-        //           detectedValidFrame = true;
-        //         });
-        //         await Future.delayed(Duration(seconds: 1));
-        //         controller!.stopImageStream();
-        //         Navigator.pop(context , true);
-        //       }
-        //     }),
       ),
+    );
+  }
+}
+
+class FeedbackTile extends StatelessWidget {
+  const FeedbackTile({
+    super.key,
+    required this.title,
+    required this.state,
+  });
+
+  final bool state;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(title, style: TextStyle(color: Colors.white)),
+        SizedBox(width: 20),
+        state == false ? Icon(Icons.close, color: Colors.red) : Icon(Icons.check, color: Colors.green)
+      ],
     );
   }
 }
