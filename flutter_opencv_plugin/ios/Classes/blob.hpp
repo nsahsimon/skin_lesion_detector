@@ -174,7 +174,7 @@ int detectBlobs(Mat image, float roiWidthFactor, float roiHeightFactor)
     // Resize the image
     cv::resize(im, im, newSize);
 
-	im = hairRemove(im);
+	// im = hairRemove(im);
 
 	// Convert the color image to grayscale
     cv::cvtColor(im, im, cv::COLOR_BGR2GRAY);

@@ -35,7 +35,7 @@ class _CameraScreenState extends State<CameraScreen> {
   int prevDetectedSpotCountIdx = 0; //has a max value of 9
   int maxIdx = 4;
   bool imageClear = false;
-  bool imageInFocus = false;
+  bool imageInFocus = true;
 
   Future<void> listenToFocusMode() async {
     while (true) {
@@ -72,6 +72,16 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void recordSpotCount(int currentSpotCount) {
+    if(currentSpotCount <= 0) {
+      setState(() {
+        detectedValidSpot == false;
+      });
+    } else {
+      setState(() {
+        detectedValidSpot == true;
+      });
+    }
+
     if(prevDetectedSpotCountIdx <= maxIdx) {
       prevDetectedSpotCounts[prevDetectedSpotCountIdx] = currentSpotCount;
       prevDetectedSpotCountIdx++;
@@ -82,8 +92,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> validateSpot() async{
-    // /// Must have recorded at least maxIdx values
-    // if(prevDetectedSpotCounts.length < maxIdx) return;
+
     for(int i = 0 ; i < maxIdx; i++) {
       if(prevDetectedSpotCounts[i] <= 0) return;
       if(prevDetectedSpotCounts[i] != prevDetectedSpotCounts[(i + 1)%(maxIdx + 1)]) return;
@@ -91,7 +100,7 @@ class _CameraScreenState extends State<CameraScreen> {
     controller!.stopImageStream();
     setState(() {
       isDetecting = false;
-      detectedValidSpot  = true;
+      imageClear  = true;
     });
     if(true ) {
       // controller!.stopImageStream();
@@ -118,10 +127,6 @@ class _CameraScreenState extends State<CameraScreen> {
         return;
       }
 
-      // listenToFocusMode();
-      // controller!.setExposureMode(ExposureMode.auto);
-      // controller!.setFocusMode(FocusMode.auto);
-      // controller!.setFlashMode(FlashMode.torch);
 
       controller?.initialize().then((_) {
         controller!.setExposureMode(ExposureMode.auto);
@@ -133,7 +138,7 @@ class _CameraScreenState extends State<CameraScreen> {
               frame = imgFrame;
               /// Do not detect skin lesions if already detecting skin lession
               int sensorExpTime = frame.sensorExposureTime ?? -1;
-              if(isDetecting == true && sensorExpTime < 50000) return;
+              if(isDetecting == true && sensorExpTime < 50000000) return;
 
               if(mounted) {
                 setState(() {
@@ -232,6 +237,18 @@ class _CameraScreenState extends State<CameraScreen> {
                       ),
                     )
                   ),
+                  Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        // width: roiWidth * 9,
+                        height: 1000,
+                        decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            border: Border.all(color: Colors.black87.withOpacity(0.5), width: roiWidth * 0.5),
+                            shape: BoxShape.circle,
+                        ),
+                      )
+                  ),
                   Positioned(
                     bottom: 10,
                     left: 10,
@@ -242,10 +259,9 @@ class _CameraScreenState extends State<CameraScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          FeedbackTile(title: "Spot detected", state: detectedValidSpot),
-                          FeedbackTile(title: "Image clear", state: imageClear),
-                          FeedbackTile(title: "Image in focus", state: imageInFocus),
-
+                          FeedbackTile(title: "Detected", state: detectedSpotCount > 0),
+                          FeedbackTile(title: "Clear", state: imageClear),
+                          FeedbackTile(title: "Focus", state: imageInFocus && detectedSpotCount < 3 && detectedSpotCount > 0),
                         ],
                       ),
                     ),
