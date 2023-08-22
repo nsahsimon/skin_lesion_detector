@@ -254,6 +254,8 @@ class _CameraScreenState extends State<CameraScreen> {
                     left: 10,
                     right: 10,
                     child: Container(
+
+
                       color: Colors.black87.withOpacity(0.4),
                       height: 100,
                       child: Column(
